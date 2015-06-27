@@ -1,0 +1,64 @@
+#compdef notes
+#autoload
+
+# Copyright (C) 2012 - 2014:
+#    Johan Venant <jvenant@invicem.pro>
+#    Brian Mattern <rephorm@rephorm.com>
+#    Jason A. Donenfeld <Jason@zx2c4.com>.
+# All Rights Reserved.
+# This file is licensed under the GPLv2+. Please see COPYING for more information.
+
+_notes () {
+	if (( CURRENT > 2)); then
+		cmd=${words[2]}
+		# Set the context for the subcommand.
+		curcontext="${curcontext%:*:*}:notes-$cmd"
+		# Narrow the range of words we are looking at to exclude `pass'
+		(( CURRENT-- ))
+		shift words
+		# Run the completion for the subcommand
+		case "${cmd}" in
+			ls|list|edit)
+				_notes_complete_entries_with_subdirs
+				;;
+			add )
+				_notes_complete_entries_with_subdirs
+				;;
+			rm|del)
+					_notes_complete_entries_with_subdirs
+				;;
+			edit|*)
+				_notes_complete_entries
+				;;
+		esac
+	else
+		local -a subcommands
+		subcommands=(
+			"ls:List passwords"
+			"add:Create a new note"
+			"edit:Edit a note with \$EDITOR"
+			"rm:Remove the note"
+			"version:Output version information"
+			"help:Output help message"
+		)
+		_describe -t commands 'notes' subcommands
+
+		_notes_complete_entries
+	fi
+}
+
+_notes_complete_entries_helper () {
+	local IFS=$'\n'
+	local prefix="${NOTES_LOCATION:-$HOME/.notes}"
+	_values -C 'notes' ${$(find -L "$prefix" \( -name .git -o -name .gpg-id \) -prune -o $@ -print 2>/dev/null | sed -e "s#${prefix}/\{0,1\}##" | sort):-""}
+}
+
+_notes_complete_entries_with_subdirs () {
+	_notes_complete_entries_helper
+}
+
+_notes_complete_entries () {
+	_notes_complete_entries_helper -type f
+}
+
+_notes
