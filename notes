@@ -99,8 +99,11 @@ list_note(){
 
 	case $arg in
 		-d | --dir ) treeopt='-d'; shift; note=${1};;
+		-a | --all ) unset SKIP_NOTES  ;;
 		* ) note=${1} ;;
 	esac
+			
+	[[ ! -z $SKIP_NOTES ]] && treeopt+=" -I ${SKIP_NOTES}"
 
 	info -m "Notes Store:"
 	[[ -z $note ]] && tree -C -l $treeopt --noreport $NOTES_LOCATION | tail -n +2 || \
@@ -108,14 +111,28 @@ list_note(){
 
 }
 
-[[ $# -lt 1 ]] && list_note && exit
+note_store_init(){
+
+	[[ ! -d $NOTES_LOCATION ]] && mkdir -p $NOTES_LOCATION && \
+		info -m "Notes dir created in: $NOTES_LOCATION"
+
+	[[ ! -f $NOTES_LOCATION/.notes.conf ]] && \
+		info -e "Copy notes.conf to $NOTES_LOCATION/" || \
+		source $NOTES_LOCATION/.notes.conf
+
+}
+
+[[ $# -lt 1 ]] && note_store_init && list_note && exit
+
+# init notes base dir and config file
+note_store_init
 
 case $1 in
 	add | a ) add_note ${@:2} ;;
  edit | e ) edit_note ${@:2} ;;
  del | rm ) del_note ${@:2} ;;
 	 ls | l ) list_note ${@:2} ;;
-	 * ) [[ ${@:1} =~  \-[a-zA-Z0-9] ]] && \
+	 * ) [[ ${@:1} =~  ^\-[a-zA-Z0-9] ]] && \
 			 info -e "Not recognized: ${@:1}" 
 			 edit_note ${@:1} ;;
 esac
