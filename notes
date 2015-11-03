@@ -3,7 +3,8 @@
 NOTES_VERSION="0.3"
 NOTES_BINARY_NAME="notes"
 NOTES_LOCATION="$HOME/.notes"
-
+NOTES_DESCRIPTION="Simple notes taking with template style, inspired by pass tool"
+NOTES_MAINTAINER="@ 2015 Marko Rakamaric"
 EDITOR="${EDITOR:-vim}"
 
 # same as pass is doing
@@ -19,6 +20,32 @@ Y="$(tput bold)$(tput setaf 3)"
 y="$(tput setaf 3)"
 g="$(tput setaf 2)"
 N="$(tput sgr0)"
+
+usage(){
+cat << EOF  
+Usage: $NOTES_BINARY_NAME <action> <note>
+  
+${G}Standard actions:${N}	
+  add [a]  <note>   crate new note 
+  edi [e]  <note>   edit already existing note  
+  del [rm] <note>   delete existing note
+  ls  [l]  <dir>    list all notes, this will ignore one in SKIP_NOTES
+
+${G}Help actions:${N}	
+  -h,h            show this screen
+  -v,--version    print version and exit
+EOF
+}
+
+version(){
+cat << EOF
+     This is  : $NOTES_BINARY_NAME
+     Version  : $NOTES_VERSION
+ Description  : $NOTES_DESCRIPTION
+   Copyright  : $NOTES_MAINTAINER
+     License  : GNU General Public License, version 3 or later
+EOF
+}
 
 template(){
 	local note=$1
@@ -132,6 +159,8 @@ case $1 in
  edit | e ) edit_note ${@:2} ;;
  del | rm ) del_note ${@:2} ;;
 	 ls | l ) list_note ${@:2} ;;
+	 -h | --help ) usage ;;
+	 -v | --version ) version ;;
 	 * ) [[ ${@:1} =~  ^\-[a-zA-Z0-9] ]] && \
 			 info -e "Not recognized: ${@:1}" 
 			 edit_note ${@:1} ;;
