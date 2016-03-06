@@ -4,7 +4,7 @@ NOTES_VERSION="0.3"
 NOTES_BINARY_NAME="notes"
 NOTES_LOCATION="$HOME/.notes"
 NOTES_DESCRIPTION="Simple notes taking with template style, inspired by pass tool"
-NOTES_MAINTAINER="@ 2015 Marko Rakamaric"
+NOTES_MAINTAINER="@ 2015-2016 Marko Rakamaric"
 EDITOR="${EDITOR:-vim}"
 
 # same as pass is doing
@@ -155,10 +155,10 @@ note_store_init(){
 note_store_init
 
 case $1 in
-	add | a ) add_note ${@:2} ;;
- edit | e ) edit_note ${@:2} ;;
- del | rm ) del_note ${@:2} ;;
-	 ls | l ) list_note ${@:2} ;;
+    add | a  ) add_note ${@:2} ;;
+    edit| e  ) edit_note ${@:2} ;;
+    del | rm ) del_note ${@:2} ;;
+	 ls | l  ) list_note ${@:2} ;;
 	 -h | --help ) usage ;;
 	 -v | --version ) version ;;
 	 * ) [[ ${@:1} =~  ^\-[a-zA-Z0-9] ]] && \
