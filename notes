@@ -1,15 +1,11 @@
 #! /bin/bash
 
-NOTES_VERSION="0.3"
+NOTES_VERSION="1.0"
 NOTES_BINARY_NAME="notes"
 NOTES_LOCATION="$HOME/.notes"
 NOTES_DESCRIPTION="Simple notes taking with template style, inspired by pass tool"
-NOTES_MAINTAINER="@ 2015-2016 Marko Rakamaric"
+NOTES_MAINTAINER="@ 2015-2018 Marko Rakamaric"
 EDITOR="${EDITOR:-vim}"
-
-# same as pass is doing
-# notes group/subject
-# notes subject
 
 # notes somename
 R="$(tput bold)$(tput setaf 1)"
@@ -22,16 +18,16 @@ g="$(tput setaf 2)"
 N="$(tput sgr0)"
 
 usage(){
-cat << EOF  
+cat << EOF
 Usage: $NOTES_BINARY_NAME <action> <note>
-  
-${G}Standard actions:${N}	
-  add [a]  <note>   crate new note 
-  edi [e]  <note>   edit already existing note  
-  del [rm] <note>   delete existing note
-  ls  [l]  <dir>    list all notes, this will ignore one in SKIP_NOTES
 
-${G}Help actions:${N}	
+${G}Standard actions:${N}
+  add  [a]  <note>   crate new note
+  edit [e]  <note>   edit already existing note
+  del  [rm] <note>   delete existing note
+  ls   [l]  <dir>    list all notes, this will ignore one in SKIP_NOTES
+
+${G}Help actions:${N}
   -h,h            show this screen
   -v,--version    print version and exit
 EOF
@@ -58,6 +54,7 @@ LAST EDIT: $(date)
 COMMENT:
 ---
 
+
 # vim: ft=notes
 EOF
 }
@@ -67,32 +64,22 @@ info(){
 	case $i in
 		-m ) printf "%s\n" "$2" ;;
 		-e ) printf "%s\n" " ${R}* Error${N}: $2"; exit 254 ;;
-		-w ) printf "%s\n" " ${Y}*${N}  $2" 	;; 
-		-i ) printf "%s\n" " ${G}*${N}  $2" 	;; 
+		-w ) printf "%s\n" " ${Y}*${N}  $2" 	;;
+		-i ) printf "%s\n" " ${G}*${N}  $2" 	;;
 	esac
-
 }
 
 add_note(){
-	local arg=${1##*/}
-	local tips=0
-	
-	case $arg in
-		--tips | -t ) tips=1; shift; note=${1##*/} ;;
-		* ) note=${1##*/} 
-	esac
-	
+	local note=${1##*/}
 	local path=$NOTES_LOCATION/$(dirname $1)
-	
+
 	# check if path exist
 	[[ -f $path/$note ]] && info -e "${B}$path/${G}$note${N} exist, use edit or del!!"
-	
-	mkdir -p $path
-	(( $tips )) && echo "# vim: ft=notes" > $path/$note || \
-		template $note >  $path/$note
-	
-	$EDITOR $path/$note
 
+	mkdir -p $path
+	template $note > $path/$note
+
+	$EDITOR $path/$note
 }
 
 edit_note(){
@@ -103,9 +90,8 @@ edit_note(){
 
 	# set edit time
 	sed -i "s/LAST EDIT:.*/LAST EDIT: $(date)/" $path/$note
-	
-	$EDITOR $path/$note
 
+	$EDITOR $path/$note
 }
 
 del_note(){
@@ -115,7 +101,7 @@ del_note(){
 	[[ ! -f $path/$note ]] && info -e "Can't delete note: ${B}$path/${G}$note${N} doesn't exist!!"
 
 	[[ $(find $path -type f | wc -l ) -gt 1 ]] && rm $path/$note || rm $path/$note && rmdir -p $path 2>/dev/null
-	
+
 	info -i "Removed ${B}$path/${G}$note${N}"
 
 }
@@ -129,7 +115,7 @@ list_note(){
 		-a | --all ) unset SKIP_NOTES  ;;
 		* ) note=${1} ;;
 	esac
-			
+
 	[[ ! -z $SKIP_NOTES ]] && treeopt+=" -I ${SKIP_NOTES}"
 
 	info -m "Notes Store:"
@@ -162,6 +148,6 @@ case $1 in
 	 -h | --help ) usage ;;
 	 -v | --version ) version ;;
 	 * ) [[ ${@:1} =~  ^\-[a-zA-Z0-9] ]] && \
-			 info -e "Not recognized: ${@:1}" 
+			 info -e "Not recognized: ${@:1}"
 			 edit_note ${@:1} ;;
 esac
