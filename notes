@@ -1,6 +1,6 @@
 #! /bin/bash
 
-NOTES_VERSION="1.0"
+NOTES_VERSION="1.1"
 NOTES_BINARY_NAME="notes"
 NOTES_LOCATION="$HOME/.notes"
 NOTES_DESCRIPTION="Simple notes taking with template style, inspired by pass tool"
@@ -147,7 +147,14 @@ case $1 in
 	 ls | l  ) list_note ${@:2} ;;
 	 -h | --help ) usage ;;
 	 -v | --version ) version ;;
-	 * ) [[ ${@:1} =~  ^\-[a-zA-Z0-9] ]] && \
+	 * )
+        [[ ${@:1} =~ ^\-[a-zA-Z0-9] ]] && \
 			 info -e "Not recognized: ${@:1}"
-			 edit_note ${@:1} ;;
+
+        # check if given arg is dir and list it
+        # otherwise we should edit note
+        [[ -d $NOTES_LOCATION/${@:1} ]] && \
+            list_note ${@:1} || \
+            edit_note ${@:1}
+        ;;
 esac
