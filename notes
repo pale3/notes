@@ -126,13 +126,15 @@ list_note(){
 
 note_store_init(){
 
+    if [[ ! -f $HOME/.notes.conf ]]; then
+		info -e "Copy notes.conf to $HOME/"
+        exit
+    fi
+
+	source $HOME/.notes.conf
+
 	[[ ! -d $NOTES_LOCATION ]] && mkdir -p $NOTES_LOCATION && \
 		info -m "Notes dir created in: $NOTES_LOCATION"
-
-	[[ ! -f $NOTES_LOCATION/.notes.conf ]] && \
-		info -e "Copy notes.conf to $NOTES_LOCATION/" || \
-		source $NOTES_LOCATION/.notes.conf
-
 }
 
 [[ $# -lt 1 ]] && note_store_init && list_note && exit
