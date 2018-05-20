@@ -124,6 +124,65 @@ list_note(){
 
 }
 
+kill_x_terminal(){
+    xkill=$($XDOTOOL search --classname $NOTES_CLASSNAME)
+    if [[ ! -z $xkill ]]; then
+        $XDOTOOL windowclose $xkill 2>/dev/null
+    fi
+}
+
+precheck(){
+    : ${FZF_BIN:="/usr/bin/fzf"}
+    : ${TERMCMD:="/usr/bin/urxvtc"}
+    : ${XDOTOOL:="/usr/bin/xdotool"}
+
+    type "$TERMCMD" >/dev/null 2>&1 || info -e "Please set TERMCMD"
+    type "$FZF_BIN" >/dev/null 2>&1 || info -e "Please install fzf"
+    type "$XDOTOOL" >/dev/null 2>&1 || info -e "Please install xdotool"
+}
+
+fzf_note(){
+    local out k q extend
+    local note linenr
+    local header1="Enter: to open | Ctrl-a: to grep all notes | Ctrl-c/Esc: to exit"
+    local header2="Esc: go back | Enter: to open | Ctrl-c: to exit"
+
+    cd $NOTES_LOCATION
+    while out=$(find . -type f | $FZF_BIN --header="$header1" --reverse \
+        --expect=esc,ctrl-c,enter,ctrl-a --print-query );
+    do
+        mapfile -t out <<< "$out"
+        k="${out[1]}"
+        q="${out[2]}"
+
+        if [[ "$k" == 'ctrl-a' ]]; then
+            out=$(find . -type f -exec grep -nH "." {} \; | $FZF_BIN --header "$header2" -n 2.. \
+                --print-query --reverse --expect=ctrl-c,enter)
+            mapfile -t out <<< "$out"; k="${out[1]}"; q="${out[2]}";
+            extend=1
+        fi
+
+        if [[ "$k" == 'enter' ]]; then
+
+            if (( $extend )); then
+                note=$(echo ${q}| cut -d ':' -f 1)
+                linenr=$(echo ${q} | awk '{print $1}' | sed "s/[^0-9]//g")
+                kill_x_terminal && $TERMCMD -e $EDITOR -c 'set nolz' -c :$linenr $note
+                exit
+            fi
+
+            kill_x_terminal && $TERMCMD -e $EDITOR $q
+            exit
+        fi
+
+        if [[ "$k" == 'esc' || "$k" == 'ctrl-c' ]]; then
+            kill_x_terminal
+            exit
+        fi
+    done
+}
+
+
 note_store_init(){
 
     if [[ ! -f $HOME/.notes.conf ]]; then
@@ -147,6 +206,13 @@ case $1 in
     edit| e  ) edit_note ${@:2} ;;
     del | rm ) del_note ${@:2} ;;
 	 ls | l  ) list_note ${@:2} ;;
+    fzf )
+        precheck
+        fzf_note ;;
+    fzf-win )
+        precheck
+        $TERMCMD -geometry ${NOTES_GEOMETRY:="200x30+139+200"} \
+            -title ${NOTES_TITLE:="notespad"} -name ${NOTES_CLASSNAME:="notespad"} -e $0 fzf ;;
 	 -h | --help ) usage ;;
 	 -v | --version ) version ;;
 	 * )
