@@ -49,7 +49,7 @@ _notes () {
 
 _notes_complete_entries_helper () {
 	local IFS=$'\n'
-	local prefix="${NOTES_LOCATION:-$HOME/.notes}"
+	local prefix="${NOTES_LOCATION:-$HOME/Dropbox/notes}"
 	_values -C 'notes' ${$(find -L "$prefix" \( -name .git -o -name .gpg-id \) -prune -o $@ -print 2>/dev/null | sed -e "s#${prefix}/\{0,1\}##" | sort):-""}
 }
 
