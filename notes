@@ -1,6 +1,6 @@
 #! /bin/bash
 
-NOTES_VERSION="1.1"
+NOTES_VERSION="1.2"
 NOTES_BINARY_NAME="notes"
 NOTES_LOCATION="$HOME/.notes"
 NOTES_DESCRIPTION="Simple notes taking with template style, inspired by pass tool"
