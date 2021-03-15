@@ -4,7 +4,7 @@ NOTES_VERSION="1.1"
 NOTES_BINARY_NAME="notes"
 NOTES_LOCATION="$HOME/.notes"
 NOTES_DESCRIPTION="Simple notes taking with template style, inspired by pass tool"
-NOTES_MAINTAINER="@ 2015-2018 Marko Rakamaric"
+NOTES_MAINTAINER="@ 2015-2021 Marko Rakamaric"
 EDITOR="${EDITOR:-vim}"
 
 # notes somename
@@ -167,11 +167,14 @@ fzf_note(){
             if (( $extend )); then
                 note=$(echo ${q}| cut -d ':' -f 1)
                 linenr=$(echo ${q} | awk '{print $1}' | sed "s/[^0-9]//g")
-                kill_x_terminal && $TERMCMD -e $EDITOR -c 'set nolz' -c :$linenr $note
+                kill_x_terminal && $TERMCMD -geometry ${NOTES_SPAWNED_GEOMETRY:="200x30+139+200"} \
+                    -title ${NOTES_TITLE:="notespad"} -name ${NOTES_CLASSNAME:="notespad"} \
+                    -e $EDITOR -c 'set nolz' -c :$linenr $note;
                 exit
             fi
 
-            kill_x_terminal && $TERMCMD -e $EDITOR $q
+            kill_x_terminal && $TERMCMD -geometry ${NOTES_SPAWNED_GEOMETRY:="200x30+139+200"} \
+            -title ${NOTES_TITLE:="notespad"} -name ${NOTES_CLASSNAME:="notespad"} -e $EDITOR $q;
             exit
         fi
 
