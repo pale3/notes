@@ -1,10 +1,10 @@
 #! /bin/bash
 
-NOTES_VERSION="1.2"
+NOTES_VERSION="1.3"
 NOTES_BINARY_NAME="notes"
 NOTES_LOCATION="$HOME/.notes"
 NOTES_DESCRIPTION="Simple notes taking with template style, inspired by pass tool"
-NOTES_MAINTAINER="@ 2015-2021 Marko Rakamaric"
+NOTES_MAINTAINER="@ 2015-2025 Marko Rakamaric"
 EDITOR="${EDITOR:-vim}"
 
 # notes somename
@@ -124,21 +124,12 @@ list_note(){
 
 }
 
-kill_x_terminal(){
-    xkill=$($XDOTOOL search --classname $NOTES_CLASSNAME)
-    if [[ ! -z $xkill ]]; then
-        $XDOTOOL windowclose $xkill 2>/dev/null
-    fi
-}
-
 precheck(){
     : ${FZF_BIN:="/usr/bin/fzf"}
     : ${TERMCMD:="/usr/bin/urxvtc"}
-    : ${XDOTOOL:="/usr/bin/xdotool"}
 
     type "$TERMCMD" >/dev/null 2>&1 || info -e "Please set TERMCMD"
     type "$FZF_BIN" >/dev/null 2>&1 || info -e "Please install fzf"
-    type "$XDOTOOL" >/dev/null 2>&1 || info -e "Please install xdotool"
 }
 
 fzf_note(){
@@ -167,19 +158,16 @@ fzf_note(){
             if (( $extend )); then
                 note=$(echo ${q}| cut -d ':' -f 1)
                 linenr=$(echo ${q} | awk '{print $1}' | sed "s/[^0-9]//g")
-                kill_x_terminal && $TERMCMD -geometry ${NOTES_SPAWNED_GEOMETRY:="200x30+139+200"} \
-                    -title ${NOTES_TITLE:="notespad"} -name ${NOTES_CLASSNAME:="notespad"} \
-                    -e $EDITOR -c 'set nolz' -c :$linenr $note;
+                $EDITOR -c 'set nolz' -c :$linenr $note;
                 exit
             fi
 
-            kill_x_terminal && $TERMCMD -geometry ${NOTES_SPAWNED_GEOMETRY:="200x30+139+200"} \
-            -title ${NOTES_TITLE:="notespad"} -name ${NOTES_CLASSNAME:="notespad"} -e $EDITOR $q;
-            exit
+						$EDITOR $q
+						exit
+
         fi
 
         if [[ "$k" == 'esc' || "$k" == 'ctrl-c' ]]; then
-            kill_x_terminal
             exit
         fi
     done
@@ -212,10 +200,6 @@ case $1 in
     fzf )
         precheck
         fzf_note ;;
-    fzf-win )
-        precheck
-        $TERMCMD -geometry ${NOTES_GEOMETRY:="200x30+139+200"} \
-            -title ${NOTES_TITLE:="notespad"} -name ${NOTES_CLASSNAME:="notespad"} -e $0 fzf ;;
 	 -h | --help ) usage ;;
 	 -v | --version ) version ;;
 	 * )
